@@ -20,10 +20,13 @@ namespace copy_pdb_to_nuget
 
         static void Main(string[] args)
         {
+            var platform = args != null && args.Contains("debug") ? "Debug" : "Release";
+            Console.WriteLine("platform = " + platform);
+
             var targetFolder = ConfigurationManager.AppSettings["TargetFolder"];
 
-            var root = new DirectoryInfo(@"D:\TheGitlabWorkspace\savory-net-foundation\savory-codedom");
-            //var root = new DirectoryInfo(Environment.CurrentDirectory);
+            //var root = new DirectoryInfo(@"D:\TheGitlabWorkspace\savory-net-foundation\savory-codedom");
+            var root = new DirectoryInfo(Environment.CurrentDirectory);
 
             var files = root.GetFiles("*csproj", SearchOption.AllDirectories);
 
@@ -56,7 +59,7 @@ namespace copy_pdb_to_nuget
                 var targetPdbFolder = Path.Combine(targetFolder, assemblyName, version);
                 if (!Directory.Exists(targetPdbFolder))
                 {
-                    Console.WriteLine($"{targetPdbFolder} NOT exists.");
+                    Console.Error.WriteLine($"{targetPdbFolder} NOT exists.");
                     continue;
                 }
 
@@ -67,20 +70,43 @@ namespace copy_pdb_to_nuget
 
                 foreach (var targetFramework in targetFrameworks)
                 {
-                    var fileName = assemblyName + ".pdb";
-                    var sourceFileName = Path.Combine(item.DirectoryName, "bin", "Release", targetFramework, fileName);
-                    var destFileName = Path.Combine(targetPdbFolder, "lib", targetFramework, fileName);
+                    {
+                        var pdbFileName = assemblyName + ".pdb";
+                        var pdbSourceFileName = Path.Combine(item.DirectoryName, "bin", platform, targetFramework, pdbFileName);
+                        var pdbDestFileName = Path.Combine(targetPdbFolder, "lib", targetFramework, pdbFileName);
+                        if (File.Exists(pdbSourceFileName))
+                        {
+                            Console.WriteLine(pdbSourceFileName);
+                            Console.WriteLine(pdbDestFileName);
+                            File.Copy(pdbSourceFileName, pdbDestFileName, true);
+                        }
+                        else
+                        {
+                            Console.Error.WriteLine($"{pdbSourceFileName} NOT exists.");
+                        }
+                    }
 
-                    File.Copy(sourceFileName, destFileName);
-                    //Console.WriteLine(sourceFileName);
-                    //Console.WriteLine(File.Exists(sourceFileName));
+                    {
+                        var dllFileName = assemblyName + ".dll";
+                        var dllSourceFileName = Path.Combine(item.DirectoryName, "bin", platform, targetFramework, dllFileName);
+                        var dllDestFileName = Path.Combine(targetPdbFolder, "lib", targetFramework, dllFileName);
+                        if (File.Exists(dllSourceFileName))
+                        {
+                            Console.WriteLine(dllSourceFileName);
+                            Console.WriteLine(dllDestFileName);
+                            File.Copy(dllSourceFileName, dllDestFileName, true);
+                        }
+                        else
+                        {
+                            Console.Error.WriteLine($"{dllSourceFileName} NOT exists.");
+                        }
+                    }
                 }
 
                 Console.WriteLine();
             }
 
             Console.WriteLine("success.");
-            Console.ReadLine();
         }
 
         static void Help()
