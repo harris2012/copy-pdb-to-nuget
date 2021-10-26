@@ -15,7 +15,7 @@ namespace copy_pdb_to_nuget
         static readonly string[] separator = new string[] { ";" };
 
         static readonly Regex AssemblyNameRegex = new Regex(@"\<AssemblyName\>(.+)\</AssemblyName\>");
-        static readonly Regex VersionRegex = new Regex(@"\n    \<Version\>(\d+\.\d+\.\d+)\</Version\>");
+        static readonly Regex VersionRegex = new Regex(@"\<Version\>(\d+\.\d+\.\d+)\</Version\>");
         static readonly Regex TargetFrameworksRegex = new Regex(@"\<TargetFramework[s]?\>([a-zA-Z0-9;\.]+)</TargetFramework[s]?>");
 
         static void Main(string[] args)
